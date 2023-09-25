@@ -1,42 +1,9 @@
-// const express = require("express");
-// const app = express();
-// const {generateFile} = require("./generateFile");
-// const {executeCpp} = require("./executeCpp");
-// app.use(express.urlencoded({ extended: true }));
-// app.use(express.json());
-
-// app.get("/", (req, res) => {
-//   res.json({ online: "compiler" });
-// });
-
-// app.post("/run", async(req, res) => {
-//   const { language, code } = req.body;
-//   // console.log(language + " " + code);
-//   if (code === undefined) {
-//     return res.status(404).json({ success: false, error: "Empty code body" });
-//   }
-//   //Generating the code file
-//   const filePath = await generateFile(language, code);
-
-//   //Executing the code file
-//   // const { stdout, stderr } = spawnSync(filePath);
-//   const output = await executeCpp(filePath);
-
-//   res.json({filePath, output});
-// });
-
-// app.listen(5000, () => {
-//   console.log("Server started on port 5000");
-// });
-
-
 const express = require('express');
 const app = express();
 const { generateFile } = require('./generateFile');
-const { executeCpp } = require('./executeCpp');
-const cors  = require('cors');
+const { executeCode } = require('./executeCode'); // Generic execution function
+const cors = require('cors');
 
-//middlewares
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -46,21 +13,22 @@ app.get("/", (req, res) => {
 });
 
 app.post("/run", async (req, res) => {
-    // const language = req.body.language;
-    // const code = req.body.code;
+    const { language, code } = req.body;
 
-    const { language = 'cpp', code } = req.body;
-    if (code === undefined) {
-        return res.status(404).json({ success: false, error: "Empty code!" });
+    if (!language || !code) {
+        return res.status(400).json({ success: false, error: "Language and code are required!" });
     }
+    console.log(language, code);
     try {
         const filePath = await generateFile(language, code);
-        const output = await executeCpp(filePath);
+        console.log(filePath);
+        const output = await executeCode(language, filePath);
         res.json({ filePath, output });
     } catch (error) {
         res.status(500).json({ error: error });
     }
 });
+
 
 app.listen(5000, () => {
     console.log("Server is listening on port 5000!");
