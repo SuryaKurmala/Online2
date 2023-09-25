@@ -23,7 +23,7 @@ const executePython = (filepath) => {
           console.log("stdout:", stdout);
           console.log("stderr:", stderr);
           
-          fs.writeFileSync(outPath, stdout, "utf-8");
+          fs.writeFileSync(outPath, "helllllllo", "utf-8");
           resolve(outPath); 
         }
       }
